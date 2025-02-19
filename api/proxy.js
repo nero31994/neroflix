@@ -8,47 +8,14 @@ export default async function handler(req, res) {
         const response = await fetch(vidSrcUrl);  
         let html = await response.text();  
 
-        // Remove pop-ups, redirects, and unwanted scripts  
-        html = html  
-            .replace(/<script[^>]*>.*?<\/script>/gis, '') // Remove scripts  
-            .replace(/window\.open/g, '') // Block pop-ups  
-            .replace(/location\.href/g, ''); // Block redirects  
+        // Extract video file URL (basic method, may need adjustments)
+        const regex = /file:"(https:\/\/[^"]+\.m3u8)"/;
+        const match = html.match(regex);
+        if (!match) return res.status(500).json({ error: "Failed to extract video URL" });
 
-        // Inject CSS & JavaScript for anti-clickjacking  
-        html = html.replace("</head>", `  
-            <style>  
-                body { background: #000 !important; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }  
-                iframe { width: 100vw !important; height: 100vh !important; border: none; }  
-                a { pointer-events: none !important; } /* Disable all links */  
-            </style>  
-            <script>  
-                document.addEventListener("DOMContentLoaded", () => {  
-                    document.body.addEventListener("click", (event) => {  
-                        event.preventDefault();  
-                        event.stopPropagation();  
-                    }, true);  
+        const videoUrl = match[1];  
 
-                    document.body.addEventListener("mousedown", (event) => {  
-                        event.preventDefault();  
-                        event.stopPropagation();  
-                    }, true);  
-
-                    document.body.addEventListener("mouseup", (event) => {  
-                        event.preventDefault();  
-                        event.stopPropagation();  
-                    }, true);  
-
-                    document.body.addEventListener("touchstart", (event) => {  
-                        event.preventDefault();  
-                        event.stopPropagation();  
-                    }, true);  
-                });  
-            </script>  
-            </head>  
-        `);  
-
-        res.setHeader("Content-Type", "text/html");  
-        res.status(200).send(html);  
+        res.json({ videoUrl });  
     } catch (error) {  
         res.status(500).json({ error: "Failed to fetch video" });  
     }  
