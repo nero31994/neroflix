@@ -2,6 +2,10 @@ export default async function handler(req, res) {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: "Movie ID is required" });
 
+    // Set anti-clickjacking headers (allow embedding only on your own site)
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    res.setHeader("Content-Security-Policy", "frame-ancestors 'self';");
+
     const vidSrcUrl = `https://vidsrc.me/embed/movie/${id}`;
 
     try {
@@ -23,11 +27,7 @@ export default async function handler(req, res) {
             </head>
         `);
 
-        // Set anti-clickjacking headers
-        res.setHeader("X-Frame-Options", "DENY"); // Prevents embedding in iframes
-        res.setHeader("Content-Security-Policy", "frame-ancestors 'none';"); // Modern alternative to X-Frame-Options
         res.setHeader("Content-Type", "text/html");
-
         res.status(200).send(html);
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch video" });
