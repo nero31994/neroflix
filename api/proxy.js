@@ -23,7 +23,11 @@ export default async function handler(req, res) {
             </head>
         `);
 
+        // Set anti-clickjacking headers
+        res.setHeader("X-Frame-Options", "DENY"); // Prevents embedding in iframes
+        res.setHeader("Content-Security-Policy", "frame-ancestors 'none';"); // Modern alternative to X-Frame-Options
         res.setHeader("Content-Type", "text/html");
+
         res.status(200).send(html);
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch video" });
