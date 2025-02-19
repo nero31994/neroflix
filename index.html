@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Site</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #121212; color: white; text-align: center; }
+        #search { width: 80%; padding: 10px; margin: 20px 0; font-size: 16px; }
+        .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        .movie { width: 150px; cursor: pointer; transition: 0.3s; }
+        .movie:hover { transform: scale(1.05); }
+        .movie img { width: 100%; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Movie Site</h1>
+    <input type="text" id="search" placeholder="Search movies..." oninput="searchMovies()">
+    <div id="movies" class="grid"></div>
+
+    <script>
+        const API_KEY = 'YOUR_TMDB_API_KEY'; // Replace with your TMDB API key
+        const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+        const PROXY_URL = 'https://your-vercel-app.vercel.app/api/proxy?id='; // Replace with your deployed Vercel proxy
+
+        async function fetchMovies(url) {
+            const res = await fetch(url);
+            const data = await res.json();
+            displayMovies(data.results);
+        }
+
+        function displayMovies(movies) {
+            const moviesDiv = document.getElementById("movies");
+            moviesDiv.innerHTML = "";
+            movies.forEach(movie => {
+                const movieEl = document.createElement("div");
+                movieEl.classList.add("movie");
+                movieEl.innerHTML = `
+                    <img src="${IMG_URL}${movie.poster_path}" alt="${movie.title}">
+                    <p>${movie.title}</p>
+                `;
+                movieEl.onclick = () => window.open(`${PROXY_URL}${movie.id}`, "_blank");
+                moviesDiv.appendChild(movieEl);
+            });
+        }
+
+        function searchMovies() {
+            const query = document.getElementById("search").value;
+            if (query.length > 2) {
+                fetchMovies(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`);
+            } else {
+                fetchMovies(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}`);
+            }
+        }
+
+        // Load popular movies on page load
+        fetchMovies(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}`);
+    </script>
+</body>
+</html>
