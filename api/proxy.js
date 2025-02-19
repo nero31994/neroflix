@@ -1,4 +1,6 @@
-export default async function handler(req, res) {
+const fetch = require('node-fetch');
+
+module.exports = async (req, res) => {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: "Movie ID is required" });
 
@@ -14,7 +16,7 @@ export default async function handler(req, res) {
             .replace(/window\.open/g, '') // Block pop-ups
             .replace(/location\.href/g, ''); // Block redirects
 
-        // Inject CSS & JavaScript to prevent unwanted clicks & redirects
+        // Inject CSS & JavaScript to fix full-screen and block unwanted clicks
         html = html.replace("</head>", `
             <style>
                 body { background: #000 !important; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
@@ -36,4 +38,4 @@ export default async function handler(req, res) {
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch video" });
     }
-}
+};
