@@ -2,10 +2,6 @@ export default async function handler(req, res) {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: "Movie ID is required" });
 
-    // Set anti-clickjacking headers (allow embedding only on your own site)
-    res.setHeader("X-Frame-Options", "SAMEORIGIN");
-    res.setHeader("Content-Security-Policy", "frame-ancestors 'self';");
-
     const vidSrcUrl = `https://vidsrc.me/embed/movie/${id}`;
 
     try {
@@ -18,12 +14,20 @@ export default async function handler(req, res) {
             .replace(/window\.open/g, '') // Block pop-ups
             .replace(/location\.href/g, ''); // Block redirects
 
-        // Inject custom CSS to fix fullscreen video player
+        // Inject CSS & JavaScript to prevent unwanted clicks & redirects
         html = html.replace("</head>", `
             <style>
                 body { background: #000 !important; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
                 iframe { width: 100vw !important; height: 100vh !important; border: none; }
+                a { pointer-events: none !important; } /* Disable malicious links */
             </style>
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.addEventListener("click", (event) => {
+                        event.stopPropagation(); // Stop redirection on click
+                    }, true);
+                });
+            </script>
             </head>
         `);
 
