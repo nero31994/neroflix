@@ -77,8 +77,8 @@
     function loadPlayer(id) {
       const src =
         currentType === 'movie'
-          ? `https://vidsrc.to/embed/movie/${id}`
-          : `https://vidsrc.to/embed/tv/${id}`;
+          ? `https://autoembed.pro/embed/movie/${id}`
+          : `https://autoembed.pro/embed/tv/${id}`;
       document.getElementById("iframePlayer").src = src;
       document.getElementById("playerContainer").style.display = "flex";
     }
